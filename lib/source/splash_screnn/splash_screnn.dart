@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../home/home_page.dart';
+import '../home/home_main_page.dart';
+
 import '../utils/push_widget.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -18,34 +19,35 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(
       const Duration(seconds: 5),
     ).then(
-      (value) => push(context, const HomePage()),
+      (value) => push(context, Calendar()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 5, 5, 5),
+      backgroundColor: Color.fromARGB(38, 0, 0, 0),
       body: SingleChildScrollView(
         child: SizedBox(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
           child: Stack(
             children: <Widget>[
+              Container(
+                color: const Color.fromARGB(255, 0, 0, 0),
+              ),
               SizedBox(
-                // padding: EdgeInsets.only(top: 115, bottom: 0),
                 height: MediaQuery.of(context).size.height,
                 width: double.infinity,
                 child: Image.asset('Barbe_Shop.png'),
               ),
               Container(
-                color: const Color.fromARGB(32, 75, 75, 75),
                 child: const Center(
                   child: CircularProgressIndicator(
-                    color: Color.fromARGB(255, 255, 255, 255),
+                    color: Color.fromARGB(255, 243, 243, 243),
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),

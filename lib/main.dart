@@ -1,8 +1,10 @@
+import 'package:barbearia_adriano/source/home/home_main_page.dart';
+import 'package:barbearia_adriano/source/splash_screnn/splash_screnn.dart';
 import 'package:flutter/material.dart';
-import 'source/splash_screnn/splash_screnn.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -11,13 +13,22 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const SplashScreen(),
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: [
+        Locale('en', ''), // Inglês
+        Locale('pt', 'BR'), // Português
+        Locale.fromSubtags(
+            languageCode: 'zh'), // Chinês *Veja os locais avançados abaixo *
+        // ... outras localidades que o aplicativo suporta
+      ],
+      home: SplashScreen(),
     );
   }
 }
