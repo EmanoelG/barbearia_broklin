@@ -14,7 +14,6 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
-    // criar a regra de firebase etc.
     super.initState();
     Future.delayed(
       const Duration(seconds: 5),

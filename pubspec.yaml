@@ -43,7 +43,9 @@ dependencies:
   table_calendar: ^3.0.7
   syncfusion_flutter_calendar: ^20.2.50
   flutter_clean_calendar: ^1.1.0
-
+  badges: ^2.0.3
+  datetime_picker_formfield: ^2.0.1
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -69,6 +71,7 @@ flutter:
   assets:
     - Barbe_Shop.png
     - fundo_main.jpg
+    - fundo.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
