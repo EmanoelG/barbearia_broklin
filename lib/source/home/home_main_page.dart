@@ -1,5 +1,6 @@
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'event.dart';
@@ -14,11 +15,12 @@ class _CalendarState extends State<Calendar> {
   CalendarFormat format = CalendarFormat.month;
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
-
+  var box;
   TextEditingController _eventControllerName = TextEditingController();
   TextEditingController _eventControllerHorario = TextEditingController();
   @override
   void initState() {
+    box = Hive.openBox('agenda');
     selectedEvents = {};
     super.initState();
   }
@@ -30,6 +32,7 @@ class _CalendarState extends State<Calendar> {
   @override
   void dispose() {
     _eventControllerName.dispose();
+
     super.dispose();
   }
 
@@ -57,9 +60,9 @@ class _CalendarState extends State<Calendar> {
                   image: AssetImage('fundo.png'),
                   opacity: 20,
                   colorFilter: ColorFilter.mode(
-                      Color.fromARGB(255, 0, 0, 0), BlendMode.color),
+                      Color.fromARGB(31, 255, 181, 152), BlendMode.color),
                 ),
-              ),
+              ), //Color.fromARGB(255, 0, 0, 0)
               child: Column(
                 children: [
                   Container(
@@ -105,19 +108,27 @@ class _CalendarState extends State<Calendar> {
       textScaleFactor: 2,
       TextSpan(
         style: TextStyle(
-            backgroundColor: Color.fromARGB(155, 146, 146, 146),
-            fontWeight: FontWeight.bold),
+          backgroundColor: Color.fromARGB(118, 190, 143, 99),
+          shadows: <Shadow>[
+            Shadow(
+              offset: Offset(3.0, 2.8),
+              blurRadius: 1.0,
+              color: Color.fromARGB(195, 0, 0, 0),
+            ),
+          ],
+          fontWeight: FontWeight.bold,
+        ),
         children: [
           TextSpan(
             text: 'BARBER',
             style: TextStyle(
-                color: Color.fromARGB(255, 3, 3, 3),
+                color: Color.fromARGB(195, 0, 0, 0),
                 fontWeight: FontWeight.bold),
           ),
           TextSpan(
             text: 'SHOP',
             style: TextStyle(
-                color: Color.fromARGB(255, 12, 12, 12),
+                color: Color.fromARGB(195, 0, 0, 0),
                 fontWeight: FontWeight.bold),
           ),
         ],
@@ -157,8 +168,6 @@ class _CalendarState extends State<Calendar> {
       },
       startingDayOfWeek: StartingDayOfWeek.sunday,
       daysOfWeekVisible: true,
-
-      //Day Changed
       onDaySelected: (DateTime selectDay, DateTime focusDay) {
         setState(() {
           selectedDay = selectDay;
@@ -169,19 +178,17 @@ class _CalendarState extends State<Calendar> {
       selectedDayPredicate: (DateTime date) {
         return isSameDay(selectedDay, date);
       },
-
       eventLoader: _getEventsfromDay,
-
       calendarStyle: CalendarStyle(
         isTodayHighlighted: true,
         selectedDecoration: BoxDecoration(
-          color: Colors.blue,
+          color: Colors.black,
           shape: BoxShape.rectangle,
           borderRadius: BorderRadius.circular(5.0),
         ),
         selectedTextStyle: TextStyle(color: Colors.white),
         todayDecoration: BoxDecoration(
-          color: Color.fromARGB(124, 96, 194, 4),
+          color: Colors.brown,
           shape: BoxShape.rectangle,
           borderRadius: BorderRadius.circular(5.0),
         ),
@@ -199,7 +206,7 @@ class _CalendarState extends State<Calendar> {
         titleCentered: true,
         formatButtonShowsNext: false,
         formatButtonDecoration: BoxDecoration(
-          color: Colors.blue,
+          color: Colors.brown,
           borderRadius: BorderRadius.circular(5.0),
         ),
         formatButtonTextStyle: const TextStyle(
@@ -307,12 +314,13 @@ class _CalendarState extends State<Calendar> {
               ),
               TextButton(
                 child: Text("Ok"),
-                onPressed: () {
+                onPressed: () async {
                   print('Clicou');
                   if (_eventControllerName.text.isEmpty ||
                       _eventControllerHorario.text.isEmpty) {
                   } else {
                     if (selectedEvents[selectedDay] != null) {
+                      print('adiciona aqui');
                       selectedEvents[selectedDay]?.add(
                         Event(
                           title: _eventControllerName.text,
@@ -320,12 +328,17 @@ class _CalendarState extends State<Calendar> {
                         ),
                       );
                     } else {
-                      selectedEvents[selectedDay] = [
-                        Event(
-                          title: _eventControllerName.text,
-                          horario: _eventControllerHorario.text,
-                        )
-                      ];
+                      print('nao sei aqui');
+                      try {
+                        await box.put('nome', _eventControllerName.text);
+
+                        selectedEvents[selectedDay] = [
+                          Event(
+                            title: _eventControllerName.text,
+                            horario: _eventControllerHorario.text,
+                          )
+                        ];
+                      } catch (e) {}
                     }
                   }
                   Navigator.pop(context);

@@ -1,4 +1,3 @@
-import 'package:barbearia_adriano/source/home/home_main_page.dart';
 import 'package:barbearia_adriano/source/splash_screnn/splash_screnn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -13,15 +12,18 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Flutter Demo',
+    return MaterialApp(
+      title: 'Barber Shop',
       debugShowCheckedModeBanner: false,
-      localizationsDelegates: [
+      theme: ThemeData(
+          primarySwatch: Colors.brown,
+          scaffoldBackgroundColor: Colors.white.withAlpha(190)),
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: [
+      supportedLocales: const [
         Locale('en', ''), // Inglês
         Locale('pt', 'BR'), // Português
         Locale.fromSubtags(
