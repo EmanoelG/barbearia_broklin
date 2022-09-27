@@ -1,8 +1,11 @@
+import 'package:barbearia_adriano/source/model/agenda.dart';
+import 'package:barbearia_adriano/source/model/agenda_model.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../service/agenda_service.dart';
 import 'event.dart';
 
 class Calendar extends StatefulWidget {
@@ -15,12 +18,11 @@ class _CalendarState extends State<Calendar> {
   CalendarFormat format = CalendarFormat.month;
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
-  var box;
+
   TextEditingController _eventControllerName = TextEditingController();
   TextEditingController _eventControllerHorario = TextEditingController();
   @override
   void initState() {
-    box = Hive.openBox('agenda');
     selectedEvents = {};
     super.initState();
   }
@@ -330,8 +332,6 @@ class _CalendarState extends State<Calendar> {
                     } else {
                       print('nao sei aqui');
                       try {
-                        await box.put('nome', _eventControllerName.text);
-
                         selectedEvents[selectedDay] = [
                           Event(
                             title: _eventControllerName.text,
@@ -339,6 +339,13 @@ class _CalendarState extends State<Calendar> {
                           )
                         ];
                       } catch (e) {}
+                      Agenda agendar = Agenda();
+                      agendar.Nome = _eventControllerName.text;
+                      agendar.Nome = selectedDay.day.toString() +
+                          ' horas' +
+                          _eventControllerHorario.text;
+                      bool favoritar =
+                          await AgendaServices.saveAgenda(context, agendar);
                     }
                   }
                   Navigator.pop(context);

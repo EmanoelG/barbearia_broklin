@@ -1,6 +1,8 @@
+import 'package:barbearia_adriano/source/model/agenda_model.dart';
 import 'package:barbearia_adriano/source/splash_screnn/splash_screnn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,25 +14,33 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Barber Shop',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-          primarySwatch: Colors.brown,
-          scaffoldBackgroundColor: Colors.white.withAlpha(190)),
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<FavoritoServiceModel>(
+          create: (context) => FavoritoServiceModel(),
+          // dispose: (context, bloc) => bloc.dispose(),
+        ),
       ],
-      supportedLocales: const [
-        Locale('en', ''), // Inglês
-        Locale('pt', 'BR'), // Português
-        Locale.fromSubtags(
-            languageCode: 'zh'), // Chinês *Veja os locais avançados abaixo *
-        // ... outras localidades que o aplicativo suporta
-      ],
-      home: SplashScreen(),
+      child: MaterialApp(
+        title: 'Barber Shop',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+            primarySwatch: Colors.brown,
+            scaffoldBackgroundColor: Colors.white.withAlpha(190)),
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en', ''), // Inglês
+          Locale('pt', 'BR'), // Português
+          Locale.fromSubtags(
+              languageCode: 'zh'), // Chinês *Veja os locais avançados abaixo *
+          // ... outras localidades que o aplicativo suporta
+        ],
+        home: SplashScreen(),
+      ),
     );
   }
 }

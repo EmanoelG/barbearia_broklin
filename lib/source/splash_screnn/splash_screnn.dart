@@ -1,7 +1,9 @@
+import 'package:barbearia_adriano/source/model/agenda.dart';
 import 'package:flutter/material.dart';
 
 import '../home/home_main_page.dart';
 
+import '../service/sql/db_helper.dart';
 import '../utils/push_widget.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -14,12 +16,18 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
-    super.initState();
-    Future.delayed(
-      const Duration(seconds: 5),
-    ).then(
-      (value) => push(context, Calendar()),
-    );
+    // Future.delayed(Duration(seconds: 15), () {
+    //     push(context, LoginPage());
+    //   });
+
+    //Inicializa banco de dados.
+    Future futureA = DatabaseHelper.getInstance().db;
+    Future futureB = Future.delayed(Duration(seconds: 3));
+    // Verifica se o usuario manteve logado.
+
+    Future.wait([futureA, futureB]).then((List values) {
+      pushReplace(context, Calendar(), replace: false);
+    });
   }
 
   @override
