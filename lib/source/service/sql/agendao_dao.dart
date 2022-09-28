@@ -8,7 +8,7 @@ class AgendaDAO extends BaseDAO<Agenda> {
 
   @override
   Agenda fromJson(Map<String, dynamic> map) {
-    return Agenda.fromJson(map.toString());
+    return Agenda.fromJson(map);
   }
 
   Future<List<Agenda>> findAllByTipo(String ids) async {

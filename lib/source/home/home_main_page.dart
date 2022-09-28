@@ -348,7 +348,7 @@ class _CalendarState extends State<Calendar> {
                       } catch (e) {}
                       Agenda agendar = Agenda();
                       agendar.Nome = _eventControllerName.text;
-
+                                            agendar.outro = '';
                       agendar.horario = selectedDay.toString().substring(0, 19);
 
                       bool favoritar =

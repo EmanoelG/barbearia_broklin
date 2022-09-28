@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import '../home/event.dart';
 import '../service/agenda_service.dart';
 
-class FavoritoServiceModel extends ChangeNotifier {
+class AgendaServiceModel extends ChangeNotifier {
   late List selectedEvents;
   Future getAgendado() async {
     selectedEvents = await AgendaServices.getAgendados();

@@ -7,27 +7,27 @@ import '../model/agenda_model.dart';
 
 class AgendaServices {
   static Future<bool> saveAgenda(context, Agenda c) async {
-    Agenda f = Agenda.fromJson(c.toJson());
+    Agenda f = Agenda.fromJson(c.toMap());
     final dao = AgendaDAO();
     final ids = await dao.save(c);
 
     if (ids != null) {
       print('SAve');
 
-      Provider.of<FavoritoServiceModel>(context, listen: false).getAgendado();
+      Provider.of<AgendaServiceModel>(context, listen: false).getAgendado();
       return false;
     } else {
       // dao.save(f);
       // print('Save');
 
-      Provider.of<FavoritoServiceModel>(context, listen: false).getAgendado();
+      Provider.of<AgendaServiceModel>(context, listen: false).getAgendado();
       return true;
     }
   }
 
-  static Future<List> getAgendados() async {
+  static Future<List<Agenda>> getAgendados() async {
     // SELECT * from carro c, favorito f where c.id = f.id;
-    List agen = await AgendaDAO().query("SELECT * from agenda ;");
+    List<Agenda> agen = await AgendaDAO().query("SELECT * from agenda ;");
     print('return agendados $agen');
     return agen;
   }

@@ -16,8 +16,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<FavoritoServiceModel>(
-          create: (context) => FavoritoServiceModel(),
+        ChangeNotifierProvider<AgendaServiceModel>(
+          create: (context) => AgendaServiceModel(),
           // dispose: (context, bloc) => bloc.dispose(),
         ),
       ],
