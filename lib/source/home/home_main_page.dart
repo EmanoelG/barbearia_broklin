@@ -329,6 +329,13 @@ class _CalendarState extends State<Calendar> {
                           horario: _eventControllerHorario.text,
                         ),
                       );
+                      Agenda agendar = Agenda();
+                      agendar.Nome = _eventControllerName.text;
+
+                      agendar.horario = selectedDay.toString().substring(0, 19);
+
+                      bool favoritar =
+                          await AgendaServices.saveAgenda(context, agendar);
                     } else {
                       print('nao sei aqui');
                       try {
@@ -341,9 +348,9 @@ class _CalendarState extends State<Calendar> {
                       } catch (e) {}
                       Agenda agendar = Agenda();
                       agendar.Nome = _eventControllerName.text;
-                      agendar.Nome = selectedDay.day.toString() +
-                          ' horas' +
-                          _eventControllerHorario.text;
+
+                      agendar.horario = selectedDay.toString().substring(0, 19);
+
                       bool favoritar =
                           await AgendaServices.saveAgenda(context, agendar);
                     }

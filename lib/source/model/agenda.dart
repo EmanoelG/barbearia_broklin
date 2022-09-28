@@ -4,31 +4,28 @@ import 'package:barbearia_adriano/source/service/sql/entity.dart';
 
 class Agenda extends Entity {
   String? Nome;
-  DateTime? horario;
-  int? idUser;
+  String? horario;
+
   Agenda({
     this.Nome,
     this.horario,
-    this.idUser,
   });
   @override
   Map<String, dynamic> toMap() {
     return {
       'Nome': this.Nome,
       'horario': this.horario,
-      'idUser': this.idUser,
     };
   }
 
   Agenda copyWith({
     String? Nome,
-    DateTime? horario,
+    String? horario,
     int? idUser,
   }) {
     return Agenda(
       Nome: Nome ?? this.Nome,
       horario: horario ?? this.horario,
-      idUser: idUser ?? this.idUser,
     );
   }
 
@@ -36,7 +33,6 @@ class Agenda extends Entity {
     return Agenda(
       Nome: map['Nome'],
       horario: map['horario'],
-      idUser: map['idUser'],
     );
   }
 
@@ -45,19 +41,15 @@ class Agenda extends Entity {
   factory Agenda.fromJson(String source) => Agenda.fromMap(json.decode(source));
 
   @override
-  String toString() =>
-      'Agenda(Nome: $Nome, horario: $horario, idUser: $idUser)';
+  String toString() => 'Agenda(Nome: $Nome, horario: $horario)';
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is Agenda &&
-        other.Nome == Nome &&
-        other.horario == horario &&
-        other.idUser == idUser;
+    return other is Agenda && other.Nome == Nome && other.horario == horario;
   }
 
   @override
-  int get hashCode => Nome.hashCode ^ horario.hashCode ^ idUser.hashCode;
+  int get hashCode => Nome.hashCode ^ horario.hashCode;
 }

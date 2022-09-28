@@ -1,4 +1,5 @@
 import 'package:barbearia_adriano/source/model/agenda.dart';
+import 'package:barbearia_adriano/source/model/agendaID.dart';
 import 'package:barbearia_adriano/source/service/sql/agendao_dao.dart';
 import 'package:provider/provider.dart';
 
@@ -24,9 +25,9 @@ class AgendaServices {
     }
   }
 
-  static Future<List<Agenda>> getAgendados() async {
+  static Future<List> getAgendados() async {
     // SELECT * from carro c, favorito f where c.id = f.id;
-    List<Agenda> agen = await AgendaDAO().query("SELECT * from agendados ;");
+    List agen = await AgendaDAO().query("SELECT * from agenda ;");
     print('return agendados $agen');
     return agen;
   }

@@ -9,7 +9,7 @@ import 'entity.dart';
 abstract class BaseDAO<T extends Entity> {
   String get tableName;
   T fromJson(Map<String, dynamic> map);
-  Future<Database> get db => DatabaseHelper.getInstance().db;
+  Future<Database> db = DatabaseHelper.getInstance().db;
 
   Future<int> save(T entity) async {
     var dbClient = await db;

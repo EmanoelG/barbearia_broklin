@@ -1,2 +1,2 @@
- CREATE TABLE agenda(id INTEGER PRIMARY KEY, nome TEXT, dataTimes TEXT, outro TEXT);
+ CREATE TABLE agenda(id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, horario  TEXT, outro TEXT);
 

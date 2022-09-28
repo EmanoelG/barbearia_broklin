@@ -14,18 +14,29 @@ class DatabaseHelper {
   //static Database _db ;
   static late Database _db;
   Future<Database> get db async {
-    _getDatabase;
     // if (_verificaExistencia == true) {
     //   print('_db>> $_db');
     //   return _db;
     // }
-    _db = await _initDb();
-    print('_db>>>> $_db');
+
+    _db = await _getDatabasess();
     return _db;
   }
 
-  Future<Database> _getDatabase() async {
+  Future<Database> _getDatabasess() async {
     return openDatabase(
+      join(await getDatabasesPath(), 'agendados.db'),
+      onCreate: (db, version) async {
+        String s = await rootBundle.loadString("assests/sql/create_sql");
+        return db.execute(s);
+      },
+      version: 1,
+    );
+  }
+
+  Future<dynamic> _getDatabase() async {
+    Database _dbs;
+    _dbs = await openDatabase(
       join(await getDatabasesPath(), 'agendados.db'),
       onCreate: (db, version) async {
         String s = await rootBundle.loadString("assests/sql/create_sql");
@@ -33,7 +44,9 @@ class DatabaseHelper {
         return db.execute(s);
       },
       version: 1,
+      onUpgrade: _onUpgrade,
     );
+    return _dbs;
   }
 
   Future _initDb() async {
@@ -76,6 +89,7 @@ class DatabaseHelper {
 
   Future close() async {
     var dbClient = await db;
+
     return dbClient.close();
   }
 }

@@ -5,7 +5,7 @@ import '../home/event.dart';
 import '../service/agenda_service.dart';
 
 class FavoritoServiceModel extends ChangeNotifier {
-  late List<Agenda> selectedEvents;
+  late List selectedEvents;
   Future getAgendado() async {
     selectedEvents = await AgendaServices.getAgendados();
     notifyListeners();
