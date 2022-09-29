@@ -4,6 +4,7 @@ import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../service/agenda_service.dart';
 import 'event.dart';
@@ -14,20 +15,21 @@ class Calendar extends StatefulWidget {
 }
 
 class _CalendarState extends State<Calendar> {
-  late Map<DateTime, List<Event>> selectedEvents;
+  late Map<DateTime, List<Agenda>> selectedEvents;
   CalendarFormat format = CalendarFormat.month;
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
-
+  late AgendaServiceModel mod;
   TextEditingController _eventControllerName = TextEditingController();
   TextEditingController _eventControllerHorario = TextEditingController();
   @override
   void initState() {
     selectedEvents = {};
+
     super.initState();
   }
 
-  List<Event> _getEventsfromDay(DateTime date) {
+  List<Agenda> _getEventsfromDay(DateTime date) {
     return selectedEvents[date] ?? [];
   }
 
@@ -41,6 +43,9 @@ class _CalendarState extends State<Calendar> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    // mod = Provider.of<AgendaServiceModel>(context);
+
+    // selectedEvents[mod.selectedEvents];
     return Scaffold(
       appBar: AppBar(
         title: _titlehometab(),
@@ -82,14 +87,22 @@ class _CalendarState extends State<Calendar> {
                     color: Color.fromARGB(235, 253, 253, 253),
                     height: size.height * 0.23,
                     width: size.width * 0.9,
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          ..._getEventsfromDay(selectedDay).map(
-                            (Event event) => _agendado(event),
-                          ),
-                        ],
-                      ),
+                    child: Consumer<AgendaServiceModel>(
+                      builder: (context, value, child) {
+                        return value.selectedEvents.isEmpty
+                            ? SingleChildScrollView(
+                                child: Consumer<AgendaServiceModel>(
+                                builder: ((context, agendadosMemory, child) =>
+                                    Column(
+                                      children: [
+                                        ..._getEventsfromDay(selectedDay).map(
+                                          (Agenda event) => _agendado(event),
+                                        ),
+                                      ],
+                                    )),
+                              ))
+                            : Container();
+                      },
                     ),
                   ),
                 ],
@@ -141,7 +154,7 @@ class _CalendarState extends State<Calendar> {
   List<Widget> get _dateSelected {
     return [
       ..._getEventsfromDay(selectedDay).map(
-        (Event event) => _agendado(event),
+        (Agenda event) => _agendado(event),
       ),
     ];
   }
@@ -221,7 +234,7 @@ class _CalendarState extends State<Calendar> {
 /* ..._getEventsfromDay(selectedDay).map(
           (Event event) => _agendado(event),
         ), */
-  _agendado(Event event) {
+  _agendado(Agenda event) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
@@ -257,7 +270,7 @@ class _CalendarState extends State<Calendar> {
                       fontWeight: FontWeight.normal),
                 ),
                 TextSpan(
-                  text: event.title,
+                  text: event.Nome,
                   style: const TextStyle(
                       color: Color.fromARGB(255, 0, 0, 0),
                       fontWeight: FontWeight.bold),
@@ -324,8 +337,8 @@ class _CalendarState extends State<Calendar> {
                     if (selectedEvents[selectedDay] != null) {
                       print('adiciona aqui');
                       selectedEvents[selectedDay]?.add(
-                        Event(
-                          title: _eventControllerName.text,
+                        Agenda(
+                          Nome: _eventControllerName.text,
                           horario: _eventControllerHorario.text,
                         ),
                       );
@@ -340,15 +353,15 @@ class _CalendarState extends State<Calendar> {
                       print('nao sei aqui');
                       try {
                         selectedEvents[selectedDay] = [
-                          Event(
-                            title: _eventControllerName.text,
+                          Agenda(
+                            Nome: _eventControllerName.text,
                             horario: _eventControllerHorario.text,
                           )
                         ];
                       } catch (e) {}
                       Agenda agendar = Agenda();
                       agendar.Nome = _eventControllerName.text;
-                                            agendar.outro = '';
+                      agendar.outro = '';
                       agendar.horario = selectedDay.toString().substring(0, 19);
 
                       bool favoritar =
@@ -357,7 +370,9 @@ class _CalendarState extends State<Calendar> {
                   }
                   Navigator.pop(context);
                   _eventControllerName.clear();
-                  setState(() {});
+                  setState(() {
+                    mod.selectedEvents;
+                  });
                   return;
                 },
               ),
@@ -371,5 +386,13 @@ class _CalendarState extends State<Calendar> {
       ),
       icon: Icon(Icons.add),
     );
+  }
+
+  void _carregaagendados() {
+    mod.getAgendado();
+    DateTime hour;
+    var map = mod.selectedEvents.asMap();
+    print(map.keys);
+    // selectedEvents =;
   }
 }
