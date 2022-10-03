@@ -19,7 +19,7 @@ class _CalendarState extends State<Calendar> {
   CalendarFormat format = CalendarFormat.month;
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
-  late AgendaServiceModel mod;
+
   TextEditingController _eventControllerName = TextEditingController();
   TextEditingController _eventControllerHorario = TextEditingController();
   @override
@@ -87,22 +87,12 @@ class _CalendarState extends State<Calendar> {
                     color: Color.fromARGB(235, 253, 253, 253),
                     height: size.height * 0.23,
                     width: size.width * 0.9,
-                    child: Consumer<AgendaServiceModel>(
-                      builder: (context, value, child) {
-                        return value.selectedEvents.isEmpty
-                            ? SingleChildScrollView(
-                                child: Consumer<AgendaServiceModel>(
-                                builder: ((context, agendadosMemory, child) =>
-                                    Column(
-                                      children: [
-                                        ..._getEventsfromDay(selectedDay).map(
-                                          (Agenda event) => _agendado(event),
-                                        ),
-                                      ],
-                                    )),
-                              ))
-                            : Container();
-                      },
+                    child: Column(
+                      children: [
+                        ..._getEventsfromDay(selectedDay).map(
+                          (Agenda event) => _agendado(event),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -231,9 +221,6 @@ class _CalendarState extends State<Calendar> {
     );
   }
 
-/* ..._getEventsfromDay(selectedDay).map(
-          (Event event) => _agendado(event),
-        ), */
   _agendado(Agenda event) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -370,9 +357,7 @@ class _CalendarState extends State<Calendar> {
                   }
                   Navigator.pop(context);
                   _eventControllerName.clear();
-                  setState(() {
-                    mod.selectedEvents;
-                  });
+                  setState(() {});
                   return;
                 },
               ),
@@ -386,13 +371,5 @@ class _CalendarState extends State<Calendar> {
       ),
       icon: Icon(Icons.add),
     );
-  }
-
-  void _carregaagendados() {
-    mod.getAgendado();
-    DateTime hour;
-    var map = mod.selectedEvents.asMap();
-    print(map.keys);
-    // selectedEvents =;
   }
 }
