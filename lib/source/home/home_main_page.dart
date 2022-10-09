@@ -1,13 +1,9 @@
 import 'package:barbearia_adriano/source/model/agenda.dart';
-import 'package:barbearia_adriano/source/model/agenda_model.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../service/agenda_service.dart';
-import 'event.dart';
 
 class Calendar extends StatefulWidget {
   @override
@@ -43,9 +39,6 @@ class _CalendarState extends State<Calendar> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    // mod = Provider.of<AgendaServiceModel>(context);
-
-    // selectedEvents[mod.selectedEvents];
     return Scaffold(
       appBar: AppBar(
         title: _titlehometab(),

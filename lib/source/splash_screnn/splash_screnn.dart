@@ -51,6 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Container(
                 child: const Center(
                   child: CircularProgressIndicator(
+                    
                     color: Color.fromARGB(255, 243, 243, 243),
                   ),
                 ),

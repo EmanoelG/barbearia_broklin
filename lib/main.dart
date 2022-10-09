@@ -14,33 +14,25 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<AgendaServiceModel>(
-          create: (context) => AgendaServiceModel(),
-          // dispose: (context, bloc) => bloc.dispose(),
-        ),
+    return MaterialApp(
+      title: 'Barber Shop',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+          primarySwatch: Colors.brown,
+          scaffoldBackgroundColor: Colors.white.withAlpha(190)),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
       ],
-      child: MaterialApp(
-        title: 'Barber Shop',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-            primarySwatch: Colors.brown,
-            scaffoldBackgroundColor: Colors.white.withAlpha(190)),
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('en', ''), // Inglês
-          Locale('pt', 'BR'), // Português
-          Locale.fromSubtags(
-              languageCode: 'zh'), // Chinês *Veja os locais avançados abaixo *
-          // ... outras localidades que o aplicativo suporta
-        ],
-        home: SplashScreen(),
-      ),
+      supportedLocales: const [
+        Locale('en', ''), // Inglês
+        Locale('pt', 'BR'), // Português
+        Locale.fromSubtags(
+            languageCode: 'zh'), // Chinês *Veja os locais avançados abaixo *
+        // ... outras localidades que o aplicativo suporta
+      ],
+      home: SplashScreen(),
     );
   }
 }

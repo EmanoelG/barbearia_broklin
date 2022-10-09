@@ -1,5 +1,4 @@
 import 'package:barbearia_adriano/source/model/agenda.dart';
-import 'package:barbearia_adriano/source/model/agendaID.dart';
 import 'package:barbearia_adriano/source/service/sql/agendao_dao.dart';
 import 'package:provider/provider.dart';
 
