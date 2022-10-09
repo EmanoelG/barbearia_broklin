@@ -1,13 +1,10 @@
-import 'dart:async';
-
 import 'package:mobx/mobx.dart';
-
 import 'package:barbearia_adriano/source/model/agenda.dart';
 import 'package:barbearia_adriano/source/service/agenda_service.dart';
 
 part 'agenda_model.g.dart';
 
-class AgendaModel = AgendaModelBase with _$Counter;
+class AgendaModel = AgendaModelBase with _$AgendaModel;
 
 abstract class AgendaModelBase with Store {
   @observable
