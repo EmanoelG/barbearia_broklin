@@ -4,21 +4,21 @@ import 'package:barbearia_adriano/source/model/agenda.dart';
 import 'package:barbearia_adriano/source/service/agenda_service.dart';
 
 class AgendaBloc {
-  final streamController = StreamController<List<Agenda>>();
-  Stream<List<Agenda>> get StreamAgenda => streamController.stream;
+  final _streamController = StreamController<List<Agenda>>();
+  Stream<List<Agenda>> get StreamAgenda => _streamController.stream;
 
   Future<List<Agenda>> fetch() async {
     try {
       List<Agenda> agendados = await AgendaServices.getAgendados();
-      streamController.add(agendados);
+      _streamController.add(agendados);
       return agendados;
     } catch (e) {
-      streamController.addError(e);
+      _streamController.addError(e);
       throw const FormatException();
     }
   }
 
   void dispose() {
-    streamController.close();
+    _streamController.close();
   }
 }

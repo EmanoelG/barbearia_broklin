@@ -4,7 +4,6 @@ import 'package:barbearia_adriano/source/model/agenda.dart';
 import 'package:barbearia_adriano/source/model/agenda_model.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -34,7 +33,7 @@ class _CalendarState extends State<Calendar>
     _agendaBloc.fetch();
 
     selectedEvents = {};
-    // addSchedules();
+
     super.initState();
   }
 
@@ -43,15 +42,12 @@ class _CalendarState extends State<Calendar>
   }
 
   List<Agenda> _getEventsfromDay(DateTime date) {
-    print('Oq vem $date');
-    print('Oq tem $selectedEvents');
-
     return selectedEvents[date] ?? [];
   }
 
   @override
   void dispose() {
-    _eventControllerName.dispose();
+    _agendaBloc.dispose();
 
     super.dispose();
   }
@@ -59,9 +55,7 @@ class _CalendarState extends State<Calendar>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    // mod = Provider.of<AgendaServiceModel>(context);
 
-    // selectedEvents[mod.selectedEvents];
     return Scaffold(
       appBar: AppBar(
         title: _titlehometab(),
@@ -85,7 +79,7 @@ class _CalendarState extends State<Calendar>
                   colorFilter: ColorFilter.mode(
                       Color.fromARGB(31, 255, 181, 152), BlendMode.color),
                 ),
-              ), //Color.fromARGB(255, 0, 0, 0)
+              ),
               child: Column(
                 children: [
                   Container(
@@ -103,21 +97,20 @@ class _CalendarState extends State<Calendar>
                     color: Color.fromARGB(235, 253, 253, 253),
                     height: size.height * 0.23,
                     width: size.width * 0.9,
-                    child: Column(
-                      children: [
-                        ..._getEventsfromDay(selectedDay).map(
-                          (Agenda event) => _agendado(event),
-                        ),
-                      ],
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          ..._getEventsfromDay(selectedDay).map(
+                            (Agenda event) => _agendado(event),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          // ..._getEventsfromDay(selectedDay).map(
-          //   (Event event) => _agendado(event),
-          // ),
         ],
       ),
       floatingActionButton: _addhorario(context),
@@ -170,7 +163,7 @@ class _CalendarState extends State<Calendar>
 
   _calendar() {
     return StreamBuilder(
-      stream: _agendaBloc.streamController.stream,
+      stream: _agendaBloc.StreamAgenda,
       builder: (context, snapshot) {
         if (snapshot.error != null) {
           return const Center(
@@ -186,38 +179,9 @@ class _CalendarState extends State<Calendar>
             agendaList = agendados!;
             print('MEU $selectedEvents ZOVO');
             _groupEvents(agendaList);
-            // agendados?.forEach(
-            //   (element) {
-            //     var dataSave;
-
-            //     dataSave = '${element.horario}';
-            //     print('::: ' + dataSave);
-            //     DateTime dataOrigen = DateTime.parse(dataSave);
-            //     DateTime date = DateTime.utc(
-            //         dataOrigen.year, dataOrigen.month, dataOrigen.day, 12);
-            //     selectedEvents[date]?.add(
-            //       Agenda(
-            //         Nome: element.Nome ?? 'eheheh',
-            //         horario: element.horario ?? '1240124',
-            //       ),
-            //     );
-            //   },
-            // );
-
           } else {
             _agendaBloc.fetch();
           }
-
-          // var dataSave;
-          //   dataSave = e.horario?.substring(0, 19);
-          //   DateTime dataOrigen = DateTime.parse(dataSave);
-          //   selectedEvents[dataOrigen]!.add(Agenda(
-          //     Nome: e.Nome,
-          //     horario: e.horario,
-          //   ));
-          //   setState(() {
-          //     selectedEvents;
-          //   });
         }
 
         return TableCalendar(
@@ -408,6 +372,7 @@ class _CalendarState extends State<Calendar>
 
                       bool favoritar =
                           await AgendaServices.saveAgenda(context, agendar);
+                      // _agendaBloc.fetch();
                     } else {
                       print('nao sei aqui');
                       try {
@@ -428,7 +393,11 @@ class _CalendarState extends State<Calendar>
                     }
                   }
                   Navigator.pop(context);
-                  //_eventControllerName.clear();
+                  setState(() {
+                    selectedDay = selectedDay;
+                    focusedDay = focusedDay;
+                    _agendaBloc.fetch();
+                  });
                 },
               ),
             ],

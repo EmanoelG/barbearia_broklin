@@ -11,15 +11,9 @@ class AgendaServices {
     final ids = await dao.save(c);
 
     if (ids != null) {
-      print('SAve');
-
-      Provider.of<AgendaServiceModel>(context, listen: false).getAgendado();
       return false;
     } else {
-      // dao.save(f);
-      // print('Save');
-
-      Provider.of<AgendaServiceModel>(context, listen: false).getAgendado();
+      
       return true;
     }
   }
