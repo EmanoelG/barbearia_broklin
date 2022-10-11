@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:barbearia_adriano/source/model/agenda.dart';
 import 'package:barbearia_adriano/source/model/agenda_model.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
@@ -6,15 +8,19 @@ import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../service/agenda_bloc.dart';
 import '../service/agenda_service.dart';
 import 'event.dart';
+
+List<Agenda> agendaList = [];
 
 class Calendar extends StatefulWidget {
   @override
   _CalendarState createState() => _CalendarState();
 }
 
-class _CalendarState extends State<Calendar> {
+class _CalendarState extends State<Calendar>
+    with AutomaticKeepAliveClientMixin {
   late Map<DateTime, List<Agenda>> selectedEvents;
   CalendarFormat format = CalendarFormat.month;
   DateTime selectedDay = DateTime.now();
@@ -22,14 +28,24 @@ class _CalendarState extends State<Calendar> {
 
   TextEditingController _eventControllerName = TextEditingController();
   TextEditingController _eventControllerHorario = TextEditingController();
+  AgendaBloc _agendaBloc = AgendaBloc();
   @override
   void initState() {
-    selectedEvents = {};
+    _agendaBloc.fetch();
 
+    selectedEvents = {};
+    // addSchedules();
     super.initState();
   }
 
+  int getHashCode(DateTime key) {
+    return key.day * 1000000 + key.month * 10000 + key.year;
+  }
+
   List<Agenda> _getEventsfromDay(DateTime date) {
+    print('Oq vem $date');
+    print('Oq tem $selectedEvents');
+
     return selectedEvents[date] ?? [];
   }
 
@@ -141,83 +157,139 @@ class _CalendarState extends State<Calendar> {
     );
   }
 
-  List<Widget> get _dateSelected {
-    return [
-      ..._getEventsfromDay(selectedDay).map(
-        (Agenda event) => _agendado(event),
-      ),
-    ];
+  _groupEvents(List<Agenda> events) {
+    selectedEvents = LinkedHashMap(equals: isSameDay, hashCode: getHashCode);
+    for (var event in events) {
+      var hourRes = event.horario;
+      DateTime datess = DateTime.parse(hourRes!);
+      DateTime date = DateTime.utc(datess.year, datess.month, datess.day, 12);
+      if (selectedEvents[date] == null) selectedEvents[date] = [];
+      selectedEvents[date]!.add(event);
+    }
   }
 
   _calendar() {
-    return TableCalendar(
-      locale: 'pt_BR',
-      availableCalendarFormats: const {
-        CalendarFormat.month: 'Mês',
-        CalendarFormat.twoWeeks: '2 Semana',
-        CalendarFormat.week: 'Semana',
-        // CalendarFormat.values: bucet,
-      },
-      focusedDay: selectedDay,
-      weekNumbersVisible: false,
-      weekendDays: const [DateTime.sunday],
-      firstDay: DateTime(1990),
-      lastDay: DateTime(2050),
-      calendarFormat: format,
-      onFormatChanged: (CalendarFormat _format) {
-        setState(
-          () {
-            format = _format;
+    return StreamBuilder(
+      stream: _agendaBloc.streamController.stream,
+      builder: (context, snapshot) {
+        if (snapshot.error != null) {
+          return const Center(
+            child: Text('ERORR'),
+          );
+        } else if (!snapshot.hasData) {
+          return CircularProgressIndicator();
+        } else {
+          print('Diferente de erro ');
+          List<Agenda>? agendados;
+          if (snapshot.data != null) {
+            agendados = snapshot.data;
+            agendaList = agendados!;
+            print('MEU $selectedEvents ZOVO');
+            _groupEvents(agendaList);
+            // agendados?.forEach(
+            //   (element) {
+            //     var dataSave;
+
+            //     dataSave = '${element.horario}';
+            //     print('::: ' + dataSave);
+            //     DateTime dataOrigen = DateTime.parse(dataSave);
+            //     DateTime date = DateTime.utc(
+            //         dataOrigen.year, dataOrigen.month, dataOrigen.day, 12);
+            //     selectedEvents[date]?.add(
+            //       Agenda(
+            //         Nome: element.Nome ?? 'eheheh',
+            //         horario: element.horario ?? '1240124',
+            //       ),
+            //     );
+            //   },
+            // );
+
+          } else {
+            _agendaBloc.fetch();
+          }
+
+          // var dataSave;
+          //   dataSave = e.horario?.substring(0, 19);
+          //   DateTime dataOrigen = DateTime.parse(dataSave);
+          //   selectedEvents[dataOrigen]!.add(Agenda(
+          //     Nome: e.Nome,
+          //     horario: e.horario,
+          //   ));
+          //   setState(() {
+          //     selectedEvents;
+          //   });
+        }
+
+        return TableCalendar(
+          locale: 'pt_BR',
+          availableCalendarFormats: const {
+            CalendarFormat.month: 'Mês',
+            CalendarFormat.twoWeeks: '2 Semana',
+            CalendarFormat.week: 'Semana',
+            // CalendarFormat.values: bucet,
           },
+          focusedDay: selectedDay,
+          weekNumbersVisible: false,
+          weekendDays: const [DateTime.sunday],
+          firstDay: DateTime(1990),
+          lastDay: DateTime(2050),
+          calendarFormat: format,
+          onFormatChanged: (CalendarFormat _format) {
+            setState(
+              () {
+                format = _format;
+              },
+            );
+          },
+          startingDayOfWeek: StartingDayOfWeek.sunday,
+          daysOfWeekVisible: true,
+          onDaySelected: (DateTime selectDay, DateTime focusDay) {
+            setState(() {
+              selectedDay = selectDay;
+              focusedDay = focusDay;
+            });
+            print(focusedDay);
+          },
+          selectedDayPredicate: (DateTime date) {
+            return isSameDay(selectedDay, date);
+          },
+          eventLoader: _getEventsfromDay,
+          calendarStyle: CalendarStyle(
+            isTodayHighlighted: true,
+            selectedDecoration: BoxDecoration(
+              color: Colors.black,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            selectedTextStyle: TextStyle(color: Colors.white),
+            todayDecoration: BoxDecoration(
+              color: Colors.brown,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            defaultDecoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(5.0),
+                color: Color.fromARGB(255, 168, 168, 166)),
+            weekendDecoration: BoxDecoration(
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+          ),
+          headerStyle: HeaderStyle(
+            formatButtonVisible: true,
+            titleCentered: true,
+            formatButtonShowsNext: false,
+            formatButtonDecoration: BoxDecoration(
+              color: Colors.brown,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            formatButtonTextStyle: const TextStyle(
+              color: Colors.white,
+            ),
+          ),
         );
       },
-      startingDayOfWeek: StartingDayOfWeek.sunday,
-      daysOfWeekVisible: true,
-      onDaySelected: (DateTime selectDay, DateTime focusDay) {
-        setState(() {
-          selectedDay = selectDay;
-          focusedDay = focusDay;
-        });
-        print(focusedDay);
-      },
-      selectedDayPredicate: (DateTime date) {
-        return isSameDay(selectedDay, date);
-      },
-      eventLoader: _getEventsfromDay,
-      calendarStyle: CalendarStyle(
-        isTodayHighlighted: true,
-        selectedDecoration: BoxDecoration(
-          color: Colors.black,
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(5.0),
-        ),
-        selectedTextStyle: TextStyle(color: Colors.white),
-        todayDecoration: BoxDecoration(
-          color: Colors.brown,
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(5.0),
-        ),
-        defaultDecoration: BoxDecoration(
-            shape: BoxShape.rectangle,
-            borderRadius: BorderRadius.circular(5.0),
-            color: Color.fromARGB(255, 168, 168, 166)),
-        weekendDecoration: BoxDecoration(
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(5.0),
-        ),
-      ),
-      headerStyle: HeaderStyle(
-        formatButtonVisible: true,
-        titleCentered: true,
-        formatButtonShowsNext: false,
-        formatButtonDecoration: BoxDecoration(
-          color: Colors.brown,
-          borderRadius: BorderRadius.circular(5.0),
-        ),
-        formatButtonTextStyle: const TextStyle(
-          color: Colors.white,
-        ),
-      ),
     );
   }
 
@@ -238,7 +310,7 @@ class _CalendarState extends State<Calendar> {
                       fontWeight: FontWeight.normal),
                 ),
                 TextSpan(
-                  text: event.horario,
+                  text: event.outro,
                   style: const TextStyle(
                       color: Color.fromARGB(255, 0, 0, 0),
                       fontWeight: FontWeight.bold),
@@ -332,7 +404,7 @@ class _CalendarState extends State<Calendar> {
                       Agenda agendar = Agenda();
                       agendar.Nome = _eventControllerName.text;
 
-                      agendar.horario = selectedDay.toString().substring(0, 19);
+                      agendar.horario = selectedDay.toString().substring(0, 12);
 
                       bool favoritar =
                           await AgendaServices.saveAgenda(context, agendar);
@@ -342,23 +414,21 @@ class _CalendarState extends State<Calendar> {
                         selectedEvents[selectedDay] = [
                           Agenda(
                             Nome: _eventControllerName.text,
-                            horario: _eventControllerHorario.text,
+                            horario: selectedDay.toString(),
                           )
                         ];
                       } catch (e) {}
                       Agenda agendar = Agenda();
                       agendar.Nome = _eventControllerName.text;
-                      agendar.outro = '';
-                      agendar.horario = selectedDay.toString().substring(0, 19);
+                      agendar.outro = _eventControllerHorario.text;
+                      agendar.horario = selectedDay.toString();
 
                       bool favoritar =
                           await AgendaServices.saveAgenda(context, agendar);
                     }
                   }
                   Navigator.pop(context);
-                  _eventControllerName.clear();
-                  setState(() {});
-                  return;
+                  //_eventControllerName.clear();
                 },
               ),
             ],
@@ -372,4 +442,7 @@ class _CalendarState extends State<Calendar> {
       icon: Icon(Icons.add),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
