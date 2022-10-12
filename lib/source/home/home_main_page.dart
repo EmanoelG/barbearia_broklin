@@ -26,7 +26,8 @@ class _CalendarState extends State<Calendar>
   CalendarFormat format = CalendarFormat.month;
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
-
+  FloatingActionButtonLocation _fabLocation =
+      FloatingActionButtonLocation.endFloat;
   TextEditingController _eventControllerName = TextEditingController();
   TextEditingController _eventControllerHorario = TextEditingController();
   AgendaBloc _agendaBloc = AgendaBloc();
@@ -66,68 +67,80 @@ class _CalendarState extends State<Calendar>
         centerTitle: true,
       ),
       extendBodyBehindAppBar: true,
-      body: SingleChildScrollView(
-        child: Container(
-          height: size.height,
-          width: size.width,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              fit: BoxFit.cover,
-              alignment: Alignment.center,
-              image: AssetImage('fundo.png'),
-              opacity: 20,
-              colorFilter: ColorFilter.mode(
-                  Color.fromARGB(31, 255, 181, 152), BlendMode.color),
+      body: Container(
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Container(
+                height: size.height,
+                width: size.width,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                    image: AssetImage('fundo.png'),
+                    opacity: 20,
+                    colorFilter: ColorFilter.mode(
+                        Color.fromARGB(31, 255, 181, 152), BlendMode.color),
+                  ),
+                ),
+              ),
             ),
-          ),
-          child: Column(
-            children: [
-              Container(
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
                 margin: EdgeInsets.only(top: size.height / 10),
                 height: size.height * 0.55,
-                width: size.width * 0.9,
+                // width: size.width * 0.9,
                 alignment: Alignment.center,
                 color: Color.fromARGB(235, 253, 253, 253),
                 child: _calendar(),
               ),
-              SizedBox(
-                height: size.height * 0.01,
-              ),
-              listaAgendamentos(context),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-      floatingActionButton: _addhorario(context),
-    );
-  }
-
-//  listaAgendamentos(context),
-  Expanded listaAgendamentos(context) {
-    final size = MediaQuery.of(context).size;
-    return Expanded(
-      child: SingleChildScrollView(
-        // physics: const BouncingScrollPhysics(),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
         child: Container(
-          //width: size.width,
+          height: size.height / 3,
+          width: double.maxFinite,
           decoration: const BoxDecoration(
-            color: Color.fromARGB(235, 253, 253, 253),
+            color: Color.fromARGB(143, 255, 255, 255),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
             ),
           ),
-          child: Column(
-            children: [
-              ..._getEventsfromDay(selectedDay).map(
-                (Agenda event) {
-                  return ItemTitle(
-                    event: event,
-                  );
-                },
-              ),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              listaAgendamentos(),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+//  listaAgendamentos(context),
+  Expanded listaAgendamentos() {
+    return Expanded(
+      child: SingleChildScrollView(
+        // physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            ..._getEventsfromDay(selectedDay).map(
+              (Agenda event) {
+                return ItemTitle(
+                  event: event,
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -178,6 +191,7 @@ class _CalendarState extends State<Calendar>
   }
 
   _calendar() {
+    final formats = DateFormat("HH:mm");
     return StreamBuilder(
       stream: _agendaBloc.StreamAgenda,
       builder: (context, snapshot) {
@@ -220,6 +234,8 @@ class _CalendarState extends State<Calendar>
               },
             );
           },
+          onDayLongPressed: (selectedDay, focusedDay) =>
+              dialogAgendamento(context, formats),
           startingDayOfWeek: StartingDayOfWeek.sunday,
           daysOfWeekVisible: true,
           onDaySelected: (DateTime selectDay, DateTime focusDay) {
@@ -276,90 +292,95 @@ class _CalendarState extends State<Calendar>
     final format = DateFormat("HH:mm");
     return FloatingActionButton.extended(
       backgroundColor: Color.fromARGB(228, 0, 0, 0),
-      onPressed: () => showDialog(
-        context: context,
-        builder: (context) => SingleChildScrollView(
-          child: AlertDialog(
-            actionsOverflowAlignment: OverflowBarAlignment.end,
-            actionsPadding: EdgeInsets.all(10),
-            actionsAlignment: MainAxisAlignment.end,
-            title: const Text(
-              "Marca horário",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            content: Column(
-              children: [
-                TextFormField(
-                  controller: _eventControllerName,
-                  decoration: const InputDecoration(
-                    hintText: 'Nome',
-                    hintStyle:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                DateTimeField(
-                  format: format,
-                  controller: _eventControllerHorario,
-                  onShowPicker: (context, currentValue) async {
-                    final time = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.fromDateTime(
-                          currentValue ?? DateTime.now()),
-                    );
-                    return DateTimeField.convert(time);
-                  },
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                child: Text("Cancel"),
-                onPressed: () => Navigator.pop(context),
-              ),
-              TextButton(
-                child: Text("Ok"),
-                onPressed: () async {
-                  print('Clicou');
-                  if (_eventControllerName.text.isEmpty ||
-                      _eventControllerHorario.text.isEmpty) {
-                  } else {
-                    try {
-                      selectedEvents[selectedDay]!.add(
-                        Agenda(
-                          Nome: _eventControllerName.text,
-                          horario: selectedDay.toString(),
-                          outro: _eventControllerHorario.text,
-                        ),
-                      );
-                    } catch (e) {}
-                    Agenda agendar = Agenda();
-                    agendar.Nome = _eventControllerName.text;
-                    agendar.outro = _eventControllerHorario.text;
-                    agendar.horario = selectedDay.toString();
-
-                    bool favoritar =
-                        await AgendaServices.saveAgenda(context, agendar);
-
-                    setState(
-                      () {
-                        selectedDay = selectedDay;
-                        focusedDay = focusedDay;
-                        _agendaBloc.fetch();
-                      },
-                    );
-                  }
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+      onPressed: () => dialogAgendamento(context, format),
       label: const Text(
         "Agendar Horario",
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
       icon: Icon(Icons.add),
+    );
+  }
+
+  dialogAgendamento(BuildContext context, DateFormat formats) async {
+    showDialog(
+      context: context,
+      builder: (context) => SingleChildScrollView(
+        child: AlertDialog(
+          actionsOverflowAlignment: OverflowBarAlignment.end,
+          actionsPadding: EdgeInsets.all(10),
+          actionsAlignment: MainAxisAlignment.end,
+          title: const Text(
+            "Marca horário",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            children: [
+              TextFormField(
+                controller: _eventControllerName,
+                decoration: const InputDecoration(
+                  hintText: 'Nome',
+                  hintStyle:
+                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              DateTimeField(
+                format: formats,
+                controller: _eventControllerHorario,
+                onShowPicker: (context, currentValue) async {
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime:
+                        TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
+                  );
+                  return DateTimeField.convert(time);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text("Cancel"),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: Text("Ok"),
+              onPressed: () async {
+                print('Clicou');
+                if (_eventControllerName.text.isEmpty ||
+                    _eventControllerHorario.text.isEmpty) {
+                } else {
+                  try {
+                    selectedEvents[selectedDay]!.add(
+                      Agenda(
+                        Nome: _eventControllerName.text,
+                        horario: selectedDay.toString(),
+                        outro: _eventControllerHorario.text,
+                      ),
+                    );
+                  } catch (e) {}
+                  Agenda agendar = Agenda();
+                  agendar.Nome = _eventControllerName.text;
+                  agendar.outro = _eventControllerHorario.text;
+                  agendar.horario = selectedDay.toString();
+
+                  bool favoritar =
+                      await AgendaServices.saveAgenda(context, agendar);
+
+                  setState(
+                    () {
+                      selectedDay = selectedDay;
+                      focusedDay = focusedDay;
+                      selectedEvents.clear();
+                      _agendaBloc.fetch();
+                    },
+                  );
+                }
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 

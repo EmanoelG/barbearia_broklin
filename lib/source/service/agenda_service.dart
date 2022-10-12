@@ -13,14 +13,14 @@ class AgendaServices {
     if (ids != null) {
       return false;
     } else {
-      
       return true;
     }
   }
 
   static Future<List<Agenda>> getAgendados() async {
     // SELECT * from carro c, favorito f where c.id = f.id;
-    List<Agenda> agen = await AgendaDAO().query("SELECT * from agenda ;");
+    List<Agenda> agen =
+        await AgendaDAO().query("SELECT * from agenda order by outro;");
     print('return agendados $agen');
     return agen;
   }
