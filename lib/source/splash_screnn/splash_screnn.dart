@@ -26,7 +26,10 @@ class _SplashScreenState extends State<SplashScreen> {
     // Verifica se o usuario manteve logado.
 
     Future.wait([futureA, futureB]).then((List values) {
-      pushReplace(context, Calendar(), replace: false);
+      push(
+        context,
+        Calendar(),
+      );
     });
   }
 

@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:ffi';
 
 import 'package:barbearia_adriano/source/model/agenda.dart';
 import 'package:barbearia_adriano/source/model/agenda_model.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../components/item_title.dart';
 import '../service/agenda_bloc.dart';
 import '../service/agenda_service.dart';
 import 'event.dart';
@@ -64,56 +66,70 @@ class _CalendarState extends State<Calendar>
         centerTitle: true,
       ),
       extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Container(
-              height: size.height,
-              width: size.width,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  fit: BoxFit.cover,
-                  alignment: Alignment.center,
-                  image: AssetImage('fundo.png'),
-                  opacity: 20,
-                  colorFilter: ColorFilter.mode(
-                      Color.fromARGB(31, 255, 181, 152), BlendMode.color),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(top: size.height / 10),
-                    height: size.height * 0.55,
-                    width: size.width * 0.9,
-                    alignment: Alignment.center,
-                    color: Color.fromARGB(235, 253, 253, 253),
-                    child: _calendar(),
-                  ),
-                  SizedBox(
-                    height: size.height * 0.03,
-                  ),
-                  Container(
-                    color: Color.fromARGB(235, 253, 253, 253),
-                    height: size.height * 0.23,
-                    width: size.width * 0.9,
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          ..._getEventsfromDay(selectedDay).map(
-                            (Agenda event) => _agendado(event),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+      body: SingleChildScrollView(
+        child: Container(
+          height: size.height,
+          width: size.width,
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+              image: AssetImage('fundo.png'),
+              opacity: 20,
+              colorFilter: ColorFilter.mode(
+                  Color.fromARGB(31, 255, 181, 152), BlendMode.color),
             ),
           ),
-        ],
+          child: Column(
+            children: [
+              Container(
+                margin: EdgeInsets.only(top: size.height / 10),
+                height: size.height * 0.55,
+                width: size.width * 0.9,
+                alignment: Alignment.center,
+                color: Color.fromARGB(235, 253, 253, 253),
+                child: _calendar(),
+              ),
+              SizedBox(
+                height: size.height * 0.01,
+              ),
+              listaAgendamentos(context),
+            ],
+          ),
+        ),
       ),
       floatingActionButton: _addhorario(context),
+    );
+  }
+
+//  listaAgendamentos(context),
+  Expanded listaAgendamentos(context) {
+    final size = MediaQuery.of(context).size;
+    return Expanded(
+      child: SingleChildScrollView(
+        // physics: const BouncingScrollPhysics(),
+        child: Container(
+          //width: size.width,
+          decoration: const BoxDecoration(
+            color: Color.fromARGB(235, 253, 253, 253),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            children: [
+              ..._getEventsfromDay(selectedDay).map(
+                (Agenda event) {
+                  return ItemTitle(
+                    event: event,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -190,7 +206,6 @@ class _CalendarState extends State<Calendar>
             CalendarFormat.month: 'Mês',
             CalendarFormat.twoWeeks: '2 Semana',
             CalendarFormat.week: 'Semana',
-            // CalendarFormat.values: bucet,
           },
           focusedDay: selectedDay,
           weekNumbersVisible: false,
@@ -257,55 +272,6 @@ class _CalendarState extends State<Calendar>
     );
   }
 
-  _agendado(Agenda event) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
-        color: Colors.white60,
-        child: ListTile(
-          subtitle: Text.rich(
-            TextSpan(
-              style: TextStyle(fontWeight: FontWeight.bold),
-              children: [
-                const TextSpan(
-                  text: 'Horário ',
-                  style: TextStyle(
-                      color: Color.fromARGB(255, 3, 3, 3),
-                      fontWeight: FontWeight.normal),
-                ),
-                TextSpan(
-                  text: event.outro,
-                  style: const TextStyle(
-                      color: Color.fromARGB(255, 0, 0, 0),
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-          title: Text.rich(
-            TextSpan(
-              style: TextStyle(fontWeight: FontWeight.bold),
-              children: [
-                const TextSpan(
-                  text: 'Nome ',
-                  style: TextStyle(
-                      color: Color.fromARGB(255, 3, 3, 3),
-                      fontWeight: FontWeight.normal),
-                ),
-                TextSpan(
-                  text: event.Nome,
-                  style: const TextStyle(
-                      color: Color.fromARGB(255, 0, 0, 0),
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   FloatingActionButton _addhorario(BuildContext context) {
     final format = DateFormat("HH:mm");
     return FloatingActionButton.extended(
@@ -357,47 +323,32 @@ class _CalendarState extends State<Calendar>
                   if (_eventControllerName.text.isEmpty ||
                       _eventControllerHorario.text.isEmpty) {
                   } else {
-                    if (selectedEvents[selectedDay] != null) {
-                      print('adiciona aqui');
-                      selectedEvents[selectedDay]?.add(
+                    try {
+                      selectedEvents[selectedDay]!.add(
                         Agenda(
                           Nome: _eventControllerName.text,
-                          horario: _eventControllerHorario.text,
+                          horario: selectedDay.toString(),
+                          outro: _eventControllerHorario.text,
                         ),
                       );
-                      Agenda agendar = Agenda();
-                      agendar.Nome = _eventControllerName.text;
+                    } catch (e) {}
+                    Agenda agendar = Agenda();
+                    agendar.Nome = _eventControllerName.text;
+                    agendar.outro = _eventControllerHorario.text;
+                    agendar.horario = selectedDay.toString();
 
-                      agendar.horario = selectedDay.toString().substring(0, 12);
+                    bool favoritar =
+                        await AgendaServices.saveAgenda(context, agendar);
 
-                      bool favoritar =
-                          await AgendaServices.saveAgenda(context, agendar);
-                      // _agendaBloc.fetch();
-                    } else {
-                      print('nao sei aqui');
-                      try {
-                        selectedEvents[selectedDay] = [
-                          Agenda(
-                            Nome: _eventControllerName.text,
-                            horario: selectedDay.toString(),
-                          )
-                        ];
-                      } catch (e) {}
-                      Agenda agendar = Agenda();
-                      agendar.Nome = _eventControllerName.text;
-                      agendar.outro = _eventControllerHorario.text;
-                      agendar.horario = selectedDay.toString();
-
-                      bool favoritar =
-                          await AgendaServices.saveAgenda(context, agendar);
-                    }
+                    setState(
+                      () {
+                        selectedDay = selectedDay;
+                        focusedDay = focusedDay;
+                        _agendaBloc.fetch();
+                      },
+                    );
                   }
                   Navigator.pop(context);
-                  setState(() {
-                    selectedDay = selectedDay;
-                    focusedDay = focusedDay;
-                    _agendaBloc.fetch();
-                  });
                 },
               ),
             ],
