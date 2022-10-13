@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../home/home_main_page.dart';
 
+import '../home/main_page.dart';
 import '../service/sql/db_helper.dart';
 import '../utils/push_widget.dart';
 
@@ -28,7 +29,8 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.wait([futureA, futureB]).then((List values) {
       push(
         context,
-        Calendar(),
+        MainPage(),
+        // Calendar(),
       );
     });
   }

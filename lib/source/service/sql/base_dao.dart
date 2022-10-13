@@ -43,6 +43,19 @@ abstract class BaseDAO<T extends Entity> {
     return null;
   }
 
+  Future<T?> findByOutro(String hora, data) async {
+    var dbClient = await db;
+    final list = await dbClient.rawQuery(
+        'select * from $tableName where outro = ? and horario = ? ',
+        [hora, data]);
+
+    if (list.length > 0) {
+      return fromJson(list.first);
+    }
+
+    return null;
+  }
+
   Future<int?> count() async {
     final dbClient = await db;
     final list = await dbClient.rawQuery('select count(*) from $tableName');

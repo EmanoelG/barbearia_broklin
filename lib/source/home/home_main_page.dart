@@ -24,8 +24,9 @@ class _CalendarState extends State<Calendar>
     with AutomaticKeepAliveClientMixin {
   late Map<DateTime, List<Agenda>> selectedEvents;
   CalendarFormat format = CalendarFormat.month;
-  DateTime selectedDay = DateTime.now();
-  DateTime focusedDay = DateTime.now();
+  DateTime _selectedDay = DateTime.now();
+  DateTime focusedDaySelect = DateTime.now();
+  bool noDate = false;
   FloatingActionButtonLocation _fabLocation =
       FloatingActionButtonLocation.endFloat;
   TextEditingController _eventControllerName = TextEditingController();
@@ -33,11 +34,10 @@ class _CalendarState extends State<Calendar>
   AgendaBloc _agendaBloc = AgendaBloc();
   @override
   void initState() {
+    super.initState();
     _agendaBloc.fetch();
 
     selectedEvents = {};
-
-    super.initState();
   }
 
   int getHashCode(DateTime key) {
@@ -67,26 +67,26 @@ class _CalendarState extends State<Calendar>
         centerTitle: true,
       ),
       extendBodyBehindAppBar: true,
-      body: Container(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              child: Container(
-                height: size.height,
-                width: size.width,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                    image: AssetImage('fundo.png'),
-                    opacity: 20,
-                    colorFilter: ColorFilter.mode(
-                        Color.fromARGB(31, 255, 181, 152), BlendMode.color),
-                  ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Container(
+              height: size.height,
+              width: size.width,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  alignment: Alignment.center,
+                  image: AssetImage('fundo.png'),
+                  opacity: 20,
+                  colorFilter: ColorFilter.mode(
+                      Color.fromARGB(31, 255, 181, 152), BlendMode.color),
                 ),
               ),
             ),
-            Padding(
+          ),
+          SingleChildScrollView(
+            child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
                 margin: EdgeInsets.only(top: size.height / 10),
@@ -97,27 +97,29 @@ class _CalendarState extends State<Calendar>
                 child: _calendar(),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
-        child: Container(
-          height: size.height / 3,
-          width: double.maxFinite,
-          decoration: const BoxDecoration(
-            color: Color.fromARGB(143, 255, 255, 255),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+        child: SingleChildScrollView(
+          child: Container(
+            height: size.height / 4,
+            width: double.maxFinite,
+            decoration: const BoxDecoration(
+              color: Color.fromARGB(143, 255, 255, 255),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
             ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              listaAgendamentos(),
-            ],
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                listaAgendamentos(),
+              ],
+            ),
           ),
         ),
       ),
@@ -133,7 +135,7 @@ class _CalendarState extends State<Calendar>
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            ..._getEventsfromDay(selectedDay).map(
+            ..._getEventsfromDay(_selectedDay).map(
               (Agenda event) {
                 return ItemTitle(
                   event: event,
@@ -197,17 +199,16 @@ class _CalendarState extends State<Calendar>
       builder: (context, snapshot) {
         if (snapshot.error != null) {
           return const Center(
-            child: Text('ERORR'),
+            child: Text('ERROR 404'),
           );
         } else if (!snapshot.hasData) {
           return CircularProgressIndicator();
         } else {
-          print('Diferente de erro ');
           List<Agenda>? agendados;
           if (snapshot.data != null) {
             agendados = snapshot.data;
             agendaList = agendados!;
-            print('MEU $selectedEvents ZOVO');
+            // print('MEU $selectedEvents; ZOVO');
             _groupEvents(agendaList);
           } else {
             _agendaBloc.fetch();
@@ -216,12 +217,15 @@ class _CalendarState extends State<Calendar>
 
         return TableCalendar(
           locale: 'pt_BR',
+          onPageChanged: (focusedDay) {
+            focusedDaySelect = focusedDay;
+          },
           availableCalendarFormats: const {
             CalendarFormat.month: 'Mês',
             CalendarFormat.twoWeeks: '2 Semana',
             CalendarFormat.week: 'Semana',
           },
-          focusedDay: selectedDay,
+          focusedDay: _selectedDay,
           weekNumbersVisible: false,
           weekendDays: const [DateTime.sunday],
           firstDay: DateTime(1990),
@@ -234,19 +238,22 @@ class _CalendarState extends State<Calendar>
               },
             );
           },
-          onDayLongPressed: (selectedDay, focusedDay) =>
-              dialogAgendamento(context, formats),
+          onDayLongPressed: (selectedDasy, focusedDay) {
+            _selectedDay = selectedDasy;
+            focusedDay = _selectedDay;
+            dialogAgendamento(context, formats);
+          },
           startingDayOfWeek: StartingDayOfWeek.sunday,
           daysOfWeekVisible: true,
           onDaySelected: (DateTime selectDay, DateTime focusDay) {
             setState(() {
-              selectedDay = selectDay;
-              focusedDay = focusDay;
+              _selectedDay = selectDay;
+              // focusedDaySelect = focusDay;
             });
-            print(focusedDay);
+            print(_selectedDay);
           },
           selectedDayPredicate: (DateTime date) {
-            return isSameDay(selectedDay, date);
+            return isSameDay(_selectedDay, date);
           },
           eventLoader: _getEventsfromDay,
           calendarStyle: CalendarStyle(
@@ -288,16 +295,15 @@ class _CalendarState extends State<Calendar>
     );
   }
 
-  FloatingActionButton _addhorario(BuildContext context) {
-    final format = DateFormat("HH:mm");
-    return FloatingActionButton.extended(
-      backgroundColor: Color.fromARGB(228, 0, 0, 0),
-      onPressed: () => dialogAgendamento(context, format),
-      label: const Text(
-        "Agendar Horario",
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  Container containerButton(BuildContext context) {
+    return Container(
+      height: 40.0,
+      margin: EdgeInsets.only(top: 10.0),
+      child: TextButton(
+        child: Text("Login",
+            style: TextStyle(color: Colors.white, fontSize: 20.0)),
+        onPressed: () {},
       ),
-      icon: Icon(Icons.add),
     );
   }
 
@@ -349,33 +355,64 @@ class _CalendarState extends State<Calendar>
                 if (_eventControllerName.text.isEmpty ||
                     _eventControllerHorario.text.isEmpty) {
                 } else {
-                  try {
-                    selectedEvents[selectedDay]!.add(
-                      Agenda(
-                        Nome: _eventControllerName.text,
-                        horario: selectedDay.toString(),
-                        outro: _eventControllerHorario.text,
-                      ),
+                  bool permitir = false;
+                  permitir = await AgendaServices.getAgendadoByData(
+                      _eventControllerHorario.text, _selectedDay.toString());
+                  if (permitir == false) {
+                    try {
+                      selectedEvents[_selectedDay]!.add(
+                        Agenda(
+                          Nome: _eventControllerName.text,
+                          horario: _selectedDay.toString(),
+                          outro: _eventControllerHorario.text,
+                        ),
+                      );
+                    } catch (e) {}
+                    Agenda agendar = Agenda();
+                    agendar.Nome = _eventControllerName.text;
+                    agendar.outro = _eventControllerHorario.text;
+                    agendar.horario = _selectedDay.toString();
+
+                    bool favoritar =
+                        await AgendaServices.saveAgenda(context, agendar);
+                    setState(
+                      () {
+                        focusedDaySelect = _selectedDay;
+                        selectedEvents.clear();
+                        _agendaBloc.fetch();
+                      },
                     );
-                  } catch (e) {}
-                  Agenda agendar = Agenda();
-                  agendar.Nome = _eventControllerName.text;
-                  agendar.outro = _eventControllerHorario.text;
-                  agendar.horario = selectedDay.toString();
+                    Navigator.pop(context);
+                  } else {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text("Horário indisponível !"),
+                          content: const Text(
+                              "Já há cliente marcado neste horario !"),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text("OK"),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            )
+                          ],
+                        );
+                      },
+                    );
+                  }
 
-                  bool favoritar =
-                      await AgendaServices.saveAgenda(context, agendar);
-
-                  setState(
-                    () {
-                      selectedDay = selectedDay;
-                      focusedDay = focusedDay;
-                      selectedEvents.clear();
-                      _agendaBloc.fetch();
-                    },
-                  );
+                  // setState(
+                  //     () {
+                  //       focusedDaySelect = _selectedDay;
+                  //       selectedEvents.clear();
+                  //       _agendaBloc.fetch();
+                  //     },
+                  //   );
                 }
-                Navigator.pop(context);
+                // Navigator.pop(context);
               },
             ),
           ],

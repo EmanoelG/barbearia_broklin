@@ -21,15 +21,33 @@ class AgendaServices {
     // SELECT * from carro c, favorito f where c.id = f.id;
     List<Agenda> agen =
         await AgendaDAO().query("SELECT * from agenda order by outro;");
-    print('return agendados $agen');
+
     return agen;
   }
 
-  static Future<List<Agenda>> getAgendadoByData(datase) async {
-    // SELECT * from carro c, favorito f where c.id = f.id;
-    List<Agenda> agen = await AgendaDAO()
-        .query("SELECT * from agendados where dataTimes = ?", [datase]);
-    print('return agendados $agen');
+  static Future<List<Agenda>> getAgendadosDay() async {
+    DateTime hoje = DateTime.now();
+    // ignore: prefer_interpolation_to_compose_strings
+    final shoje = hoje.year.toString() +
+        '-' +
+        hoje.month.toString() +
+        '-' +
+        hoje.day.toString() +
+        ' 00:00:00.000Z';
+
+    List<Agenda> agen = await AgendaDAO().query(
+        "select * from agenda where horario like ?  order by outro;", [shoje]);
+    print('Agendados do dia : $agen');
     return agen;
+  }
+
+  static Future<bool> getAgendadoByData(hora, data) async {
+    // SELECT * from carro c, favorito f where c.id = f.id; //"select * from agenda where outro = ?", [datase]
+    Agenda? agen = await AgendaDAO().findByOutro(hora, data);
+    if (agen != null) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
