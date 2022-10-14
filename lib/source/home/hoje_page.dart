@@ -17,17 +17,22 @@ class HojePage extends StatefulWidget {
   State<HojePage> createState() => _HojePageState();
 }
 
-class _HojePageState extends State<HojePage>
-    with AutomaticKeepAliveClientMixin {
-  late List<Agenda> _listaAgenda;
+class _HojePageState extends State<HojePage> {
+  Stream<List<Agenda>>? _listaAgenda;
   final AgendaBloc _agendaBloc = AgendaBloc();
   late Map<DateTime, List<Agenda>> selectedEvents;
   @override
   void initState() {
-    _listaAgenda = [];
+    _listaAgenda;
     _agendaBloc.fetch();
 
+    _listaAgenda = _agendaBloc.StreamAgendaDay;
     super.initState();
+  }  @override
+  void dispose() {
+    _agendaBloc.dispose();
+
+    super.dispose();
   }
 
   int getHashCode(DateTime key) {
@@ -80,20 +85,22 @@ class _HojePageState extends State<HojePage>
           ),
           Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  margin: EdgeInsets.only(top: size.height / 10),
-                  alignment: Alignment.topCenter,
-                  color: Color.fromARGB(28, 253, 253, 253),
-                  child: _searchproduto(),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(3.0),
+                  child: Container(
+                    margin: EdgeInsets.only(top: size.height / 10),
+                    alignment: Alignment.topCenter,
+                    color: Color.fromARGB(28, 253, 253, 253),
+                    child: _searchproduto(),
+                  ),
                 ),
               ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    color: Color.fromARGB(26, 253, 253, 253),
+                    color: Color.fromARGB(31, 253, 253, 253),
                     child: StreamBuilder(
                       stream: _agendaBloc.StreamAgendaDay,
                       builder: (context, snapshot) {
@@ -226,7 +233,4 @@ class _HojePageState extends State<HojePage>
       ),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

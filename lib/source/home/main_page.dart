@@ -19,6 +19,8 @@ class _MainPageState extends State<MainPage> {
 
   @override
   void initState() {
+
+    
     super.initState();
   }
 
@@ -46,6 +48,7 @@ class _MainPageState extends State<MainPage> {
         setState(
           () {
             _intCurrentIntegrado = indexTap;
+
             _pagaeController.jumpToPage(indexTap);
           },
         );

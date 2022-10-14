@@ -6,12 +6,14 @@ import 'package:barbearia_adriano/source/model/agenda_model.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../components/item_title.dart';
 import '../service/agenda_bloc.dart';
 import '../service/agenda_service.dart';
 import 'event.dart';
+import 'listview/lista_do_dia.dart';
 
 List<Agenda> agendaList = [];
 
@@ -20,13 +22,13 @@ class Calendar extends StatefulWidget {
   _CalendarState createState() => _CalendarState();
 }
 
-class _CalendarState extends State<Calendar>
-    with AutomaticKeepAliveClientMixin {
+class _CalendarState extends State<Calendar> {
   late Map<DateTime, List<Agenda>> selectedEvents;
   CalendarFormat format = CalendarFormat.month;
   DateTime _selectedDay = DateTime.now();
   DateTime focusedDaySelect = DateTime.now();
   bool noDate = false;
+  bool _controllBarBottom = false;
   FloatingActionButtonLocation _fabLocation =
       FloatingActionButtonLocation.endFloat;
   TextEditingController _eventControllerName = TextEditingController();
@@ -68,82 +70,141 @@ class _CalendarState extends State<Calendar>
       ),
       extendBodyBehindAppBar: true,
       body: Stack(
-        children: [
+        children: <Widget>[
           SingleChildScrollView(
             child: Container(
-              height: size.height,
               width: size.width,
+              height: size.height,
               decoration: const BoxDecoration(
                 image: DecorationImage(
+                  image: AssetImage("fundo.png"),
                   fit: BoxFit.cover,
-                  alignment: Alignment.center,
-                  image: AssetImage('fundo.png'),
-                  opacity: 20,
-                  colorFilter: ColorFilter.mode(
-                      Color.fromARGB(31, 255, 181, 152), BlendMode.color),
                 ),
               ),
             ),
           ),
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                margin: EdgeInsets.only(top: size.height / 10),
-                height: size.height * 0.55,
-                // width: size.width * 0.9,
-                alignment: Alignment.center,
-                color: Color.fromARGB(235, 253, 253, 253),
-                child: _calendar(),
-              ),
-            ),
+          Container(
+            color: Color.fromARGB(45, 0, 0, 0),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: size.height / 10),
+            height: size.height * 0.55,
+            // width: size.width * 0.9,
+            alignment: Alignment.center,
+            color: Color.fromARGB(235, 253, 253, 253),
+            child: _calendar(),
           ),
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        child: SingleChildScrollView(
-          child: Container(
-            height: size.height / 4,
-            width: double.maxFinite,
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(143, 255, 255, 255),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
+      bottomNavigationBar: _controllBarBottom == false
+          ? BottomAppBar(
+              shape: const CircularNotchedRectangle(),
+              child: SingleChildScrollView(
+                child: Container(
+                  height: size.height / 4,
+                  width: double.maxFinite,
+                  decoration: const BoxDecoration(
+                    color: Color.fromARGB(143, 255, 255, 255),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      listaAgendamentos(),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                listaAgendamentos(),
-              ],
-            ),
-          ),
-        ),
-      ),
+            )
+          : null,
     );
   }
 
+  Stack stackantingo() {
+    return Stack(children: [
+      // Container(
+      //   height: size.height,
+      //   width: size.width,
+      //   decoration: const BoxDecoration(
+      //     image: DecorationImage(
+      //       fit: BoxFit.cover,
+      //       alignment: Alignment.center,
+      //       image: AssetImage('fundo.png'),
+      //       opacity: 20,
+      //       colorFilter: ColorFilter.mode(
+      //           Color.fromARGB(31, 255, 181, 152), BlendMode.color),
+      //     ),
+      //   ),
+      // ),
+      // Padding(
+      //   padding: const EdgeInsets.all(8.0),
+      //   child: Column(
+      //     children: [
+      //       Column(
+      //         children: [
+      //           // Container(
+      //           //   margin: EdgeInsets.only(top: size.height / 10),
+      //           //   height: size.height * 0.55,
+      //           //   // width: size.width * 0.9,
+      //           //   alignment: Alignment.center,
+      //           //   color: Color.fromARGB(235, 253, 253, 253),
+      //           //   child: _calendar(),
+      //           // ),
+      //         ],
+      //       ),
+      //     ],
+      //   ),
+
+      // Column(
+      //   children: [
+      //     // Container(
+      //     //   margin: EdgeInsets.only(top: size.height / 10),
+      //     //   height: size.height * 0.55,
+      //     //   // width: size.width * 0.9,
+      //     //   alignment: Alignment.center,
+      //     //   color: Color.fromARGB(235, 253, 253, 253),
+      //     //   child: _calendar(),
+      //     // ),
+
+      //   ],
+      // ),
+      //     ),
+      //   ],
+    ]);
+    // );
+  }
+
 //  listaAgendamentos(context),
-  Expanded listaAgendamentos() {
+  listaAgendamentos() {
     return Expanded(
-      child: SingleChildScrollView(
-        // physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ..._getEventsfromDay(_selectedDay).map(
-              (Agenda event) {
-                return ItemTitle(
-                  event: event,
-                );
-              },
-            ),
-          ],
-        ),
+      child: StreamBuilder(
+        stream: _agendaBloc.StreamAgenda,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text('ERROR 404'),
+            );
+          } else if (!snapshot.hasData) {
+            return CircularProgressIndicator();
+          } else {
+            List<Agenda>? agendados;
+            if (snapshot.data != null) {
+              agendados = snapshot.data;
+              agendaList = agendados!;
+              // print('MEU $selectedEvents; ZOVO');
+              _groupEvents(agendaList);
+            } else {
+              //  _agendaBloc.fetch();
+            }
+          }
+          return ListaDoDia(
+            selectedEvents: snapshot.data ?? [],
+          );
+        },
       ),
     );
   }
@@ -194,105 +255,108 @@ class _CalendarState extends State<Calendar>
 
   _calendar() {
     final formats = DateFormat("HH:mm");
-    return StreamBuilder(
-      stream: _agendaBloc.StreamAgenda,
-      builder: (context, snapshot) {
-        if (snapshot.error != null) {
-          return const Center(
-            child: Text('ERROR 404'),
-          );
-        } else if (!snapshot.hasData) {
-          return CircularProgressIndicator();
-        } else {
-          List<Agenda>? agendados;
-          if (snapshot.data != null) {
-            agendados = snapshot.data;
-            agendaList = agendados!;
-            // print('MEU $selectedEvents; ZOVO');
-            _groupEvents(agendaList);
-          } else {
-            _agendaBloc.fetch();
-          }
-        }
+    // return StreamBuilder(
+    //   stream: _agendaBloc.StreamAgenda,
+    //   builder: (context, snapshot) {
+    //     if (snapshot.hasError) {
+    //       return const Center(
+    //         child: Text('ERROR 404'),
+    //       );
+    //     } else if (!snapshot.hasData) {
+    //       return CircularProgressIndicator();
+    //     } else {
+    //       List<Agenda>? agendados;
+    //       if (snapshot.data != null) {
+    //         agendados = snapshot.data;
+    //         agendaList = agendados!;
+    //         // print('MEU $selectedEvents; ZOVO');
+    //         _groupEvents(agendaList);
+    //       } else {
+    //         _agendaBloc.fetch();
+    //       }
+    //     }
 
-        return TableCalendar(
-          locale: 'pt_BR',
-          onPageChanged: (focusedDay) {
-            focusedDaySelect = focusedDay;
+    return TableCalendar(
+      locale: 'pt_BR',
+      onPageChanged: (focusedDay) {
+        focusedDaySelect = focusedDay;
+      },
+      availableCalendarFormats: const {
+        CalendarFormat.month: 'Mês',
+        CalendarFormat.twoWeeks: '2 Semana',
+        CalendarFormat.week: 'Semana',
+      },
+      focusedDay: _selectedDay,
+      weekNumbersVisible: false,
+      weekendDays: const [DateTime.sunday],
+      firstDay: DateTime(1990),
+      lastDay: DateTime(2050),
+      calendarFormat: format,
+      onFormatChanged: (CalendarFormat _format) {
+        setState(
+          () {
+            format = _format;
           },
-          availableCalendarFormats: const {
-            CalendarFormat.month: 'Mês',
-            CalendarFormat.twoWeeks: '2 Semana',
-            CalendarFormat.week: 'Semana',
-          },
-          focusedDay: _selectedDay,
-          weekNumbersVisible: false,
-          weekendDays: const [DateTime.sunday],
-          firstDay: DateTime(1990),
-          lastDay: DateTime(2050),
-          calendarFormat: format,
-          onFormatChanged: (CalendarFormat _format) {
-            setState(
-              () {
-                format = _format;
-              },
-            );
-          },
-          onDayLongPressed: (selectedDasy, focusedDay) {
-            _selectedDay = selectedDasy;
-            focusedDay = _selectedDay;
-            dialogAgendamento(context, formats);
-          },
-          startingDayOfWeek: StartingDayOfWeek.sunday,
-          daysOfWeekVisible: true,
-          onDaySelected: (DateTime selectDay, DateTime focusDay) {
-            setState(() {
-              _selectedDay = selectDay;
-              // focusedDaySelect = focusDay;
-            });
-            print(_selectedDay);
-          },
-          selectedDayPredicate: (DateTime date) {
-            return isSameDay(_selectedDay, date);
-          },
-          eventLoader: _getEventsfromDay,
-          calendarStyle: CalendarStyle(
-            isTodayHighlighted: true,
-            selectedDecoration: BoxDecoration(
-              color: Colors.black,
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            selectedTextStyle: TextStyle(color: Colors.white),
-            todayDecoration: BoxDecoration(
-              color: Colors.brown,
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            defaultDecoration: BoxDecoration(
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(5.0),
-                color: Color.fromARGB(255, 168, 168, 166)),
-            weekendDecoration: BoxDecoration(
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-          ),
-          headerStyle: HeaderStyle(
-            formatButtonVisible: true,
-            titleCentered: true,
-            formatButtonShowsNext: false,
-            formatButtonDecoration: BoxDecoration(
-              color: Colors.brown,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            formatButtonTextStyle: const TextStyle(
-              color: Colors.white,
-            ),
-          ),
         );
       },
+      onDayLongPressed: (selectedDasy, focusedDay) {
+        _selectedDay = selectedDasy;
+        focusedDay = _selectedDay;
+        setState(() {
+          _controllBarBottom = true;
+        });
+        dialogAgendamento(context, formats);
+      },
+      startingDayOfWeek: StartingDayOfWeek.sunday,
+      daysOfWeekVisible: true,
+      onDaySelected: (DateTime selectDay, DateTime focusDay) {
+        setState(() {
+          _selectedDay = selectDay;
+          // focusedDaySelect = focusDay;
+        });
+        print(_selectedDay);
+      },
+      selectedDayPredicate: (DateTime date) {
+        return isSameDay(_selectedDay, date);
+      },
+      eventLoader: _getEventsfromDay,
+      calendarStyle: CalendarStyle(
+        isTodayHighlighted: true,
+        selectedDecoration: BoxDecoration(
+          color: Colors.black,
+          shape: BoxShape.rectangle,
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        selectedTextStyle: TextStyle(color: Colors.white),
+        todayDecoration: BoxDecoration(
+          color: Colors.brown,
+          shape: BoxShape.rectangle,
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        defaultDecoration: BoxDecoration(
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.circular(5.0),
+            color: Color.fromARGB(255, 168, 168, 166)),
+        weekendDecoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+      ),
+      headerStyle: HeaderStyle(
+        formatButtonVisible: true,
+        titleCentered: true,
+        formatButtonShowsNext: false,
+        formatButtonDecoration: BoxDecoration(
+          color: Colors.brown,
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        formatButtonTextStyle: const TextStyle(
+          color: Colors.white,
+        ),
+      ),
     );
+    // }
+    // );
   }
 
   Container containerButton(BuildContext context) {
@@ -346,7 +410,12 @@ class _CalendarState extends State<Calendar>
           actions: [
             TextButton(
               child: Text("Cancel"),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                setState(() {
+                  _controllBarBottom = false;
+                });
+                Navigator.pop(context);
+              },
             ),
             TextButton(
               child: Text("Ok"),
@@ -379,10 +448,12 @@ class _CalendarState extends State<Calendar>
                       () {
                         focusedDaySelect = _selectedDay;
                         selectedEvents.clear();
-                        _agendaBloc.fetch();
+                        // _agendaBloc.fetch();
+                        _controllBarBottom = false;
                       },
                     );
-                    Navigator.pop(context);
+                    //_agendaBloc.dispose();
+
                   } else {
                     showDialog(
                       context: context,
@@ -410,9 +481,10 @@ class _CalendarState extends State<Calendar>
                   //       selectedEvents.clear();
                   //       _agendaBloc.fetch();
                   //     },
-                  //   );
+                  //   );Navigator.pop(context);
+
                 }
-                // Navigator.pop(context);
+                Navigator.pop(context);
               },
             ),
           ],
@@ -420,7 +492,4 @@ class _CalendarState extends State<Calendar>
       ),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
