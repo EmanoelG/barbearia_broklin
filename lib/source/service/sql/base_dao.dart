@@ -68,8 +68,9 @@ abstract class BaseDAO<T extends Entity> {
         .rawDelete('delete from $tableName where id = ?', [id]);
   }
 
-  Future<int> deleteAll() async {
+  deleteAll() async {
     var dbClient = await db;
-    return await dbClient.rawDelete('delete from $tableName');
+    return await dbClient
+        .rawDelete('delete from $tableName   where horario <  datetime("now")');
   }
 }

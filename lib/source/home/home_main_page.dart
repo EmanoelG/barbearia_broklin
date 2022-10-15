@@ -34,12 +34,13 @@ class _CalendarState extends State<Calendar> {
   TextEditingController _eventControllerName = TextEditingController();
   TextEditingController _eventControllerHorario = TextEditingController();
   AgendaBloc _agendaBloc = AgendaBloc();
+
   @override
   void initState() {
     super.initState();
     _agendaBloc.fetch();
-
     selectedEvents = {};
+    _atualizaCalendar();
   }
 
   int getHashCode(DateTime key) {
@@ -178,7 +179,6 @@ class _CalendarState extends State<Calendar> {
     // );
   }
 
-//  listaAgendamentos(context),
   listaAgendamentos() {
     return Expanded(
       child: StreamBuilder(
@@ -201,8 +201,9 @@ class _CalendarState extends State<Calendar> {
               //  _agendaBloc.fetch();
             }
           }
+
           return ListaDoDia(
-            selectedEvents: snapshot.data ?? [],
+            selectedEvents: _getEventsfromDay(_selectedDay),
           );
         },
       ),
@@ -253,29 +254,20 @@ class _CalendarState extends State<Calendar> {
     }
   }
 
+  Future _atualizaCalendar() async {
+    List<Agenda> listaAgenda = [];
+    await _agendaBloc.StreamAgenda.timeout(Duration(seconds: 3))
+        .map((event) => listaAgenda = event);
+    setState(
+      () {
+        _groupEvents(listaAgenda);
+      },
+    );
+  }
+
   _calendar() {
     final formats = DateFormat("HH:mm");
-    // return StreamBuilder(
-    //   stream: _agendaBloc.StreamAgenda,
-    //   builder: (context, snapshot) {
-    //     if (snapshot.hasError) {
-    //       return const Center(
-    //         child: Text('ERROR 404'),
-    //       );
-    //     } else if (!snapshot.hasData) {
-    //       return CircularProgressIndicator();
-    //     } else {
-    //       List<Agenda>? agendados;
-    //       if (snapshot.data != null) {
-    //         agendados = snapshot.data;
-    //         agendaList = agendados!;
-    //         // print('MEU $selectedEvents; ZOVO');
-    //         _groupEvents(agendaList);
-    //       } else {
-    //         _agendaBloc.fetch();
-    //       }
-    //     }
-
+    
     return TableCalendar(
       locale: 'pt_BR',
       onPageChanged: (focusedDay) {
@@ -300,8 +292,6 @@ class _CalendarState extends State<Calendar> {
         );
       },
       onDayLongPressed: (selectedDasy, focusedDay) {
-        _selectedDay = selectedDasy;
-        focusedDay = _selectedDay;
         setState(() {
           _controllBarBottom = true;
         });
@@ -312,7 +302,7 @@ class _CalendarState extends State<Calendar> {
       onDaySelected: (DateTime selectDay, DateTime focusDay) {
         setState(() {
           _selectedDay = selectDay;
-          // focusedDaySelect = focusDay;
+          focusedDaySelect = focusDay;
         });
         print(_selectedDay);
       },
@@ -357,18 +347,6 @@ class _CalendarState extends State<Calendar> {
     );
     // }
     // );
-  }
-
-  Container containerButton(BuildContext context) {
-    return Container(
-      height: 40.0,
-      margin: EdgeInsets.only(top: 10.0),
-      child: TextButton(
-        child: Text("Login",
-            style: TextStyle(color: Colors.white, fontSize: 20.0)),
-        onPressed: () {},
-      ),
-    );
   }
 
   dialogAgendamento(BuildContext context, DateFormat formats) async {
@@ -447,9 +425,10 @@ class _CalendarState extends State<Calendar> {
                     setState(
                       () {
                         focusedDaySelect = _selectedDay;
-                        selectedEvents.clear();
-                        // _agendaBloc.fetch();
+
+                        _agendaBloc.fetch();
                         _controllBarBottom = false;
+                        Navigator.pop(context);
                       },
                     );
                     //_agendaBloc.dispose();
@@ -476,15 +455,13 @@ class _CalendarState extends State<Calendar> {
                   }
 
                   // setState(
-                  //     () {
-                  //       focusedDaySelect = _selectedDay;
-                  //       selectedEvents.clear();
-                  //       _agendaBloc.fetch();
-                  //     },
-                  //   );Navigator.pop(context);
-
+                  //   () {
+                  //     focusedDaySelect = _selectedDay;
+                  //     selectedEvents.clear();
+                  //     // _agendaBloc.fetch();
+                  //   },
+                  // );
                 }
-                Navigator.pop(context);
               },
             ),
           ],

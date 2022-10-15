@@ -8,8 +8,7 @@ import 'package:barbearia_adriano/source/service/agenda_service.dart';
 class AgendaBloc {
   final _streamController = BehaviorSubject<List<Agenda>>();
   final _streamControllerDay = BehaviorSubject<List<Agenda>>();
-  Stream<List<Agenda>> get StreamAgenda =>
-      _streamController.stream;
+  Stream<List<Agenda>> get StreamAgenda => _streamController.stream;
 
   Stream<List<Agenda>> get StreamAgendaDay =>
       _streamControllerDay.stream.asBroadcastStream();
@@ -28,6 +27,10 @@ class AgendaBloc {
       _streamControllerDay.addError(e);
       throw const FormatException();
     }
+
+    try {
+      AgendaServices.deleteFromAllMenorNow();
+    } catch (e) {}
   }
 
   void dispose() {
@@ -46,7 +49,7 @@ class CounterBloc {
 // ele SEMPRE vai retornar o mesmo objeto nesse caso, já que ele chama: _counterController.stream
 // e o objeto se mantém o mesmo durante TODA A VIDA do BLoC
 
-  ValueStream<int> get counterFlux =>_counterController.stream;
+  ValueStream<int> get counterFlux => _counterController.stream;
 
 // Observable(stream) sendo retornado pelo getter, o problema desse pedaço do código é:
 // como os transformadores de Observable(stream) (map,where,take e outros..)
@@ -65,9 +68,8 @@ UMA VEZ, QUANDO O BLOC FOR INSTANCIADO
    
 */
 
-  Stream<int> get counterFluxTransformado => _counterController
-    .stream
-    .map((a) => a * 2);
+  Stream<int> get counterFluxTransformado =>
+      _counterController.stream.map((a) => a * 2);
 
   Sink<int> get counterEvent => _counterController.sink;
 /*
@@ -81,10 +83,7 @@ um novo objeto da classe Observable(stream)
     .map((a) => a * 2);
 */
 
-
-
-
   void dispose() {
-   _counterController.close();
+    _counterController.close();
   }
 }

@@ -50,4 +50,9 @@ class AgendaServices {
       return false;
     }
   }
+
+  static Future deleteFromAllMenorNow() async {
+    // SELECT * from carro c, favorito f where c.id = f.id; //"select * from agenda where outro = ?", [datase]
+    await AgendaDAO().deleteAll();
+  }
 }
