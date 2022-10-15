@@ -200,7 +200,7 @@ class _CalendarState extends State<Calendar>
               _groupEvents(agendaList);
             } else {
               //  _agendaBloc.fetch();
-            }
+            }adc 
           }
 
           return ListaDoDia(
