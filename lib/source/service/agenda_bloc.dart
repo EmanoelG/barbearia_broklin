@@ -10,8 +10,7 @@ class AgendaBloc {
   final _streamControllerDay = BehaviorSubject<List<Agenda>>();
   Stream<List<Agenda>> get StreamAgenda => _streamController.stream;
 
-  Stream<List<Agenda>> get StreamAgendaDay =>
-      _streamControllerDay.stream.asBroadcastStream();
+  Stream<List<Agenda>> get StreamAgendaDay => _streamControllerDay.stream;
 
   fetch() async {
     try {

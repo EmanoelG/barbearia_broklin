@@ -19,7 +19,6 @@ class _ItemTitleState extends State<ItemTitle> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -30,7 +29,7 @@ class _ItemTitleState extends State<ItemTitle> {
       ),
       color: Colors.white60,
       child: ListTile(
-        
+        leading: Icon(Icons.person),
         subtitle: Text.rich(
           TextSpan(
             style: TextStyle(fontWeight: FontWeight.bold),
@@ -69,6 +68,7 @@ class _ItemTitleState extends State<ItemTitle> {
             ],
           ),
         ),
+        trailing: const Icon(Icons.arrow_back),
       ),
     );
   }

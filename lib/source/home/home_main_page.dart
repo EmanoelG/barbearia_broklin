@@ -22,7 +22,8 @@ class Calendar extends StatefulWidget {
   _CalendarState createState() => _CalendarState();
 }
 
-class _CalendarState extends State<Calendar> {
+class _CalendarState extends State<Calendar>
+    with AutomaticKeepAliveClientMixin<Calendar> {
   late Map<DateTime, List<Agenda>> selectedEvents;
   CalendarFormat format = CalendarFormat.month;
   DateTime _selectedDay = DateTime.now();
@@ -267,7 +268,7 @@ class _CalendarState extends State<Calendar> {
 
   _calendar() {
     final formats = DateFormat("HH:mm");
-    
+
     return TableCalendar(
       locale: 'pt_BR',
       onPageChanged: (focusedDay) {
@@ -304,6 +305,7 @@ class _CalendarState extends State<Calendar> {
           _selectedDay = selectDay;
           focusedDaySelect = focusDay;
         });
+        _agendaBloc.fetch();
         print(_selectedDay);
       },
       selectedDayPredicate: (DateTime date) {
@@ -469,4 +471,8 @@ class _CalendarState extends State<Calendar> {
       ),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

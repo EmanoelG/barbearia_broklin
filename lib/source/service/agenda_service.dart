@@ -51,6 +51,16 @@ class AgendaServices {
     }
   }
 
+      static Future<bool> deleteById(int idPerson ) async {
+    // SELECT * from carro c, favorito f where c.id = f.id; //"select * from agenda where outro = ?", [datase]
+    int agen = await AgendaDAO().delete(idPerson);
+    if (agen == 1) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   static Future deleteFromAllMenorNow() async {
     // SELECT * from carro c, favorito f where c.id = f.id; //"select * from agenda where outro = ?", [datase]
     await AgendaDAO().deleteAll();
